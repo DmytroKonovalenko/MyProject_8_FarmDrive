@@ -1,0 +1,59 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Tile1 : MonoBehaviour
+{
+    private Rigidbody _rb;
+
+    private void Awake()
+    {
+        _rb = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        if (GameManager1.instance.gameOver && GameManager1.instance.freezeTiles && GameManager1.instance.gameEnded)
+        {
+            if (GameManager1.instance.freezeTiles)
+            {
+                _rb.constraints = RigidbodyConstraints.FreezeAll;
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Player")
+        {
+            TileManager1.instance.SpawnTile();
+            StartCoroutine(FallAndReplace());
+        }
+    }
+
+    private IEnumerator FallAndReplace()
+    {
+        yield return new WaitForSeconds(0.1f);
+        _rb.isKinematic = false;
+
+        yield return new WaitForSeconds(3);
+        if (!GameManager1.instance.freezeTiles)
+        {
+            this.gameObject.SetActive(false);
+            _rb.isKinematic = true;
+
+            if (this.tag == "TopTile")
+            {
+                TileManager1.instance.AddTopTile(gameObject);
+            }
+            else if (this.tag == "LeftTile")
+            {
+                TileManager1.instance.AddLeftTile(gameObject);
+            }
+        }
+        else
+        {
+            _rb.isKinematic = true;
+        }
+    }
+}
